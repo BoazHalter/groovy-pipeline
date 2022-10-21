@@ -1,27 +1,29 @@
 pipeline {
     agent none
     stages {
-        stage('Run Tests') {
+        stage('Run Downstream jobs parallel') {
             parallel {
-                stage('Test On Windows') {
-                    agent {
-                        label "windows"
-                    }
+                stage('job a') {
+                    echo 'trigger downstream job a'
                     steps {
-                        bat "run-tests.bat"
+                      script {
+                        echo 'trigger downtream-job-a'
+                        build job: 'downtream-job-a'
+                      }
                     }
                     post {
                         always {
-                            junit "**/TEST-*.xml"
+                            echo 'always do something after the previous steps'
                         }
                     }
                 }
-                stage('Test On Linux') {
-                    agent {
+                stage('job b') {
+                    agent { // <= the agent can be set in the downstream job itself 
                         label "linux"
                     }
                     steps {
-                        sh "run-tests.sh"
+                        echo 'trigger downtream-job-b'
+                        build job: 'downtream-job-b'
                     }
                     post {
                         always {
@@ -29,7 +31,12 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-    }
-}
+            }// Parallel
+        }// Stage Downstream jobs
+        stage('after parallel'){
+            steps {
+                echo 'after parallel procedure'
+            }         
+        }// Stage after parallel
+    }// Stages
+}// Pipeline
