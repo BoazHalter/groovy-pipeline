@@ -8,7 +8,10 @@ pipeline {
                     steps {
                       script {
                         echo 'trigger downtream-job-a'
-                        build job: 'downtream-job-a'
+                        sh ''' 
+                           sleep 15
+                        '''
+                        // i.e build job: 'downtream-job-a'
                       }
                     }
                     post {
@@ -23,11 +26,12 @@ pipeline {
                     }
                     steps {
                         echo 'trigger downtream-job-b'
-                        build job: 'downtream-job-b'
+                        sleep 10   
+                        // i.e build job: 'downtream-job-b'
                     }
                     post {
                         always {
-                            junit "**/TEST-*.xml"
+                            echo currentBuild.durationString
                         }
                     }
                 }
@@ -36,6 +40,7 @@ pipeline {
         stage('after parallel'){
             steps {
                 echo 'after parallel procedure'
+                echo currentBuild.durationString
             }         
         }// Stage after parallel
     }// Stages
